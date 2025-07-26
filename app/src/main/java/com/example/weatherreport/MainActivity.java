@@ -234,13 +234,21 @@ public class MainActivity extends AppCompatActivity {
             );
         } else {
             // Android 13 以下使用传统方法
-            android.content.res.Configuration config = getResources().getConfiguration();
+            android.content.res.Configuration config = new android.content.res.Configuration(getResources().getConfiguration());
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 config.setLocale(locale);//（API 24+）
             } else {
                 config.locale = locale;
             }
-            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+            
+            // 避免使用已弃用的updateConfiguration方法 (API 25+已弃用)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+                // API 25+ 使用createConfigurationContext替代updateConfiguration
+                createConfigurationContext(config);
+            } else {
+                // API 24及以下仍使用updateConfiguration (无更好的替代方案)
+                getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+            }
             recreate(); // 重启Activity以应用新语言
         }
     }
