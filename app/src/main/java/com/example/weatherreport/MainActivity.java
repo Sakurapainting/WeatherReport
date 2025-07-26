@@ -226,11 +226,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void switchLanguage(Locale locale) {
-        // 更新应用语言
-        android.content.res.Configuration config = getResources().getConfiguration();
-        config.setLocale(locale);
-        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        recreate(); // 重启Activity以应用新语言
+        // 兼容旧版本的方法
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ 使用新方法 （API 33+）
+            androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(
+                androidx.core.os.LocaleListCompat.create(locale)
+            );
+        } else {
+            // Android 13 以下使用传统方法
+            android.content.res.Configuration config = getResources().getConfiguration();
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                config.setLocale(locale);//（API 24+）
+            } else {
+                config.locale = locale;
+            }
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+            recreate(); // 重启Activity以应用新语言
+        }
     }
     private void getCurrentWeather(String cityName) {
         // 对于日本城市，确保使用英文名称
