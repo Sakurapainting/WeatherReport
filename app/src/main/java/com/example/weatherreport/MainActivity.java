@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         Button switchLangBtn = findViewById(R.id.btn_switch_language);
         switchLangBtn.setOnClickListener(v -> {
             Locale current = getResources().getConfiguration().locale;
-            Locale newLocale = current.getLanguage().equals("zh") ? Locale.ENGLISH : Locale.CHINESE;
+            Locale newLocale = current.equals(Locale.SIMPLIFIED_CHINESE) ? Locale.ENGLISH : Locale.SIMPLIFIED_CHINESE;
             switchLanguage(newLocale);
         });
     }
