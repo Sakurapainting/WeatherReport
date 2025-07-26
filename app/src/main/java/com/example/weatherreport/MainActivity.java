@@ -168,6 +168,13 @@ public class MainActivity extends AppCompatActivity {
         forecastRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         forecastAdapter = new ForecastAdapter(this, new ArrayList<>());
         forecastRecyclerView.setAdapter(forecastAdapter);
+
+        Button switchLangBtn = findViewById(R.id.btn_switch_language);
+        switchLangBtn.setOnClickListener(v -> {
+            Locale current = getResources().getConfiguration().locale;
+            Locale newLocale = current.equals(Locale.SIMPLIFIED_CHINESE) ? Locale.ENGLISH : Locale.SIMPLIFIED_CHINESE;
+            switchLanguage(newLocale);
+        });
     }
 
     @Override
@@ -201,6 +208,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // 隐藏切换语言按钮
+        Button switchLangBtn = findViewById(R.id.btn_switch_language);
+        switchLangBtn.setVisibility(View.GONE);
+        
         // 显示加载进度条，隐藏其他视图
         showLoading();
 
@@ -214,6 +225,33 @@ public class MainActivity extends AppCompatActivity {
         getForecast(cityName);
     }
 
+    private void switchLanguage(Locale locale) {
+        // 兼容旧版本的方法
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ 使用新方法 （API 33+）
+            androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(
+                androidx.core.os.LocaleListCompat.create(locale)
+            );
+        } else {
+            // Android 13 以下使用传统方法
+            android.content.res.Configuration config = new android.content.res.Configuration(getResources().getConfiguration());
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                config.setLocale(locale);//（API 24+）
+            } else {
+                config.locale = locale;
+            }
+            
+            // 避免使用已弃用的updateConfiguration方法 (API 25+已弃用)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+                // API 25+ 使用createConfigurationContext替代updateConfiguration
+                createConfigurationContext(config);
+            } else {
+                // API 24及以下仍使用updateConfiguration (无更好的替代方案)
+                getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+            }
+            recreate(); // 重启Activity以应用新语言
+        }
+    }
     private void getCurrentWeather(String cityName) {
         // 对于日本城市，确保使用英文名称
         final String finalCityName;
